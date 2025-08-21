@@ -1,0 +1,53 @@
+{
+  "name": "prog_genius-test-project",
+  "description": "Monorepo for ProgGenius test project",
+  "version": "0.1.0",
+  "private": true,
+  "browserslist": {
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "workspaces": ["apps/*"],
+  "dependencies": {
+    "autoprefixer": "^10.4.14",
+    "lint-staged": "^15.5.0",
+    "mime-types": "^2.1.27",
+    "next": "15.2.4",
+    "pg": "8.8.0",
+    "qs": "^6.14.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-router-dom": "^6.0.0"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@types/node": "^20",
+    "@types/qs": "^6.9.18",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@typescript-eslint/eslint-plugin": "^8.28.0",
+    "@typescript-eslint/parser": "^8.28.0",
+    "eslint": "^8.0.0",
+    "eslint-config-next": "15.2.4",
+    "eslint-plugin-react": "^7.37.4",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "husky": "^9.1.7",
+    "prettier": "^3.5.3",
+    "typescript": "^5"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,json}": ["yarn prettier", "yarn lint"]
+  },
+  "scripts": {
+    "back": "yarn workspace server start:dev",
+    "back:build": "yarn workspace server build",
+    "clean": "rm -rf node_modules/ apps/server/node_modules/ apps/client/node_modules/",
+    "front": "yarn workspace client dev",
+    "front:build": "yarn workspace client build",
+    "lint": "eslint . --fix",
+    "prettier": "prettier --write ."
+  }
+}
