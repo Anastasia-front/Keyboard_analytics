@@ -1,12 +1,12 @@
 const API_URL = process.env.NEXT_PUBLIC_BACK_API_URL || 'http://localhost:4000'
 
-export async function fetchStats() {
+export const fetchStats = async () => {
   const res = await fetch(`${API_URL}/counter`, { cache: 'no-store' })
   if (!res.ok) throw new Error(`Failed to fetch stats: ${res.status}`)
   return res.json()
 }
 
-export async function fetchKey(key: string) {
+export const fetchKey = async (key: string) => {
   const res = await fetch(`${API_URL}/counter/${key}`, {
     next: { revalidate: 60 }, // ISR every 60 seconds
   })
@@ -14,7 +14,7 @@ export async function fetchKey(key: string) {
   return res.json()
 }
 
-export async function deleteKey(key: string) {
+export const deleteKey = async (key: string) => {
   const res = await fetch(`${API_URL}/counter/${key}`, {
     method: 'DELETE',
     headers: { 'Content-Type': 'application/json' },

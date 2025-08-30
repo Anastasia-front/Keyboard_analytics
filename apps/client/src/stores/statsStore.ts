@@ -7,7 +7,7 @@ export interface KeyStat {
   nextKey?: string | null
 }
 
-export function createStatsStore(initialData: KeyStat[] = []) {
+export const createStatsStore = (initialData: KeyStat[] = []) => {
   return makeAutoObservable({
     stats: initialData,
 

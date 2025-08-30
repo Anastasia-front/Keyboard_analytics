@@ -1,9 +1,12 @@
-import { StatsStore } from '@/stores'
-import { runInAction } from 'mobx'
 import { useEffect } from 'react'
+
+import { runInAction } from 'mobx'
+
 import { io } from 'socket.io-client'
 
-export function useWebSocket(store: StatsStore) {
+import { StatsStore } from '@/stores'
+
+export const useWebSocket = (store: StatsStore) => {
   useEffect(() => {
     const socket = io(
       process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:4000',
