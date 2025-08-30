@@ -17,17 +17,11 @@ export async function generateStaticParams() {
   }))
 }
 
-interface PageParams {
-  params: {
-    keyName: string
-  }
-}
-
-export default async function KeyPage({ params }: PageParams) {
+const KeyPage = async ({ params }: { params: Promise<{ key: string }> }) => {
+  const { key } = await params
   try {
-    const { keyName, count, prevKey, nextKey }: KeyPageProps = await fetchKey(
-      params.keyName,
-    )
+    const { keyName, count, prevKey, nextKey }: KeyPageProps =
+      await fetchKey(key)
 
     return (
       <div className="p-35">
@@ -54,6 +48,8 @@ export default async function KeyPage({ params }: PageParams) {
       </div>
     )
   } catch (error) {
-    return <p>{`Error fetching key, ${params.keyName} with error ${error}`}</p>
+    return <p>{`Error fetching key, ${key} with error ${error}`}</p>
   }
 }
+
+export default KeyPage
