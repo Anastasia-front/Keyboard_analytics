@@ -11,6 +11,11 @@ Users can see live statistics of key presses via WebSocket, with SEO-friendly se
 - [NestJS](https://nestjs.com/) + [TypeORM](https://typeorm.io/) + [PostgreSQL](https://www.postgresql.org/)
 - [Docker](https://docs.docker.com/) + [docker-compose](https://docs.docker.com/compose/)
 - [WebSocket API](https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API)
+- [GitHub Actions](#github-actions)
+- [Deployment](#deployment)
+  - [Deploy database on Supabase](#deploy-database-on-supabase)
+  - [Deploy backend on Railway](#deploy-backend-on-railway)
+  - [Deploy frontend on Vercel](#deploy-frontend-on-vercel)
 ---
 
 ## 📂 Project structure
@@ -275,3 +280,59 @@ It must create next structure of folder:
 /src
   /app.module.ts
 ```
+
+## GitHub Actions
+   - Run tests, lint, build
+   - Deploy backend to Railway
+   - Deploy frontend to Vercel
+   - DB is managed in Supabase
+
+
+## Deployment
+### Deploy database on Supabase
+- Go to Supabase -> Register/Login -> Create a project
+- Get variables to connect backend : click on Connect button on header -> select connection method
+
+#### How to move DB from local Postgres to Supabase
+
+1. Export your local DB with pg_dump in Docker (exec tab)
+```bash
+pg_dump -U local_user -h localhost -p 5432 local_db_name > dump.sql
+```
+
+2. Go to Supabase → Project → Settings → Database → Connection info (or Connect button in the header od the Project page):
+
+- Scroll to Connection Pooling (Session Pooler / Transaction Pooler)
+
+Use that connection string instead of the “Direct Connection” one.
+* Direct connection caused the error:
+
+```bash
+psql: error: connection to server at "db.qedgqkfndvoswgmxnmqa.supabase.co" (2a05:d012:42e:570b:9105:c909:a8b6:9cd3), port 5432 failed: Network is unreachable
+        Is the server running on that host and accepting TCP/IP connections?
+```
+3. Execute command like: 
+```bash
+psql 'postgresql://postgres.qedgqkfndvoswgmxnmqa:[PASSWORD]@aws-1-eu-west-3.pooler.supabase.com:6543/postgres' < dump.sql
+```
+OR
+it could be done by one complete command like:
+```bash
+pg_dump -U local_user -h localhost -p 5432 local_db_name | psql "postgresql://postgres.qedgqkfndvoswgmxnmqa:[PASSWORD]@aws-1-eu-west-3.pooler.supabase.com:6543/postgres"
+```
+
+### Deploy backend on Railway
+- Go to Railway -> Register/Login -> Create a project (chose gitHub repo and set /apps/server as root folder)
+- Add env variables : click on project in dashboard -> go to Variables tab (there are 8 default service variables) -> add variables (DB_HOST
+DB_PORT,
+DB_USER,
+DB_PASS,
+DB_NAME,
+FRONT_BASE_URL,
+PORT)
+- Generate domain : click on project in dashboard -> go to Settings tab -> Networking section -> Generate domain (you get like name_of_project-environment.up.railway.app)
+
+### Deploy frontend on Vercel
+- Go to Vercel -> Register/Login -> Create a project (chose gitHub repo and set /apps/client as root folder)
+- Add env variables : click on project in dashboard -> go to Settings tab -> Environment Variables side menu -> add variables (NEXT_PUBLIC_BACK_API_URL, NEXT_PUBLIC_WS_URL)
+- Get domain : go to Overview tab in dashboard -> copy Domain
