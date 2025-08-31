@@ -1,6 +1,6 @@
 import Link from 'next/link'
 
-import { fetchKey, fetchStats } from '@/lib/api/stats'
+import { fetchKey/* , fetchStats */ } from '@/lib/api/stats'
 
 type KeyPageProps = {
   keyName: string
@@ -9,13 +9,13 @@ type KeyPageProps = {
   nextKey?: string | null
 }
 
-// Pre-generate all keys pages for SSG
-export async function generateStaticParams() {
-  const allKeys = await fetchStats()
-  return allKeys.map((item: { keyName: string }) => ({
-    keyName: item.keyName,
-  }))
-}
+// // Pre-generate all keys pages for SSG
+// export const generateStaticParams = async () => {
+//   const allKeys = await fetchStats()
+//   return allKeys.map((item: { keyName: string }) => ({
+//     keyName: item.keyName,
+//   }))
+// }
 
 const KeyPage = async ({ params }: { params: Promise<{ key: string }> }) => {
   const { key } = await params
