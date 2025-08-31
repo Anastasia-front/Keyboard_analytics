@@ -18,6 +18,8 @@ async function bootstrap() {
     }),
   );
 
+  console.log('CORS origin:', process.env.FRONT_BASE_URL);
+
   await app.listen(process.env.PORT ?? 4000);
 }
 bootstrap();
