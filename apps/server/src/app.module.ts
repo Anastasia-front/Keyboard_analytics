@@ -14,6 +14,7 @@ import { CounterModule } from './counter/counter.module';
       username: process.env.DB_USER,
       password: process.env.DB_PASS,
       database: process.env.DB_NAME,
+      ssl: { rejectUnauthorized: false }, // required for Supabase
       autoLoadEntities: true, // <- loads Counter automatically
       synchronize: true, // <- should create the table
     }),
