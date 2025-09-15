@@ -1,6 +1,6 @@
 import Link from 'next/link'
 
-import { fetchKey/* , fetchStats */ } from '@/lib/api/stats'
+import { fetchKey, fetchStats } from '@/lib/api/stats'
 
 type KeyPageProps = {
   keyName: string
@@ -10,18 +10,21 @@ type KeyPageProps = {
 }
 
 // // Pre-generate all keys pages for SSG
-// export const generateStaticParams = async () => {
-//   const allKeys = await fetchStats()
-//   return allKeys.map((item: { keyName: string }) => ({
-//     keyName: item.keyName,
-//   }))
-// }
+export const generateStaticParams = async () => {
+  const allKeys = await fetchStats()
+  return allKeys.map((item: { keyName: string }) => ({
+    keyName: item.keyName,
+  }))
+}
 
-const KeyPage = async ({ params }: { params: Promise<{ key: string }> }) => {
-  const { key } = await params
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const KeyPage = async (props: any) => {
+  const { params } = (await props) as { params: { keyName: string } }
+
   try {
-    const { keyName, count, prevKey, nextKey }: KeyPageProps =
-      await fetchKey(key)
+    const { keyName, count, prevKey, nextKey }: KeyPageProps = await fetchKey(
+      params.keyName,
+    )
 
     return (
       <div className="p-35">
@@ -48,7 +51,7 @@ const KeyPage = async ({ params }: { params: Promise<{ key: string }> }) => {
       </div>
     )
   } catch (error) {
-    return <p>{`Error fetching key, ${key} with error ${error}`}</p>
+    return <p>{`Error fetching key, ${params.keyName} with error ${error}`}</p>
   }
 }
 
