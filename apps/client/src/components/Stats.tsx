@@ -53,6 +53,7 @@ export const Stats = observer(({ initialStats }: StatsProps) => {
             <th className="pb-2">Letter</th>
             <th className="pb-2">CapsLock</th>
             <th className="pb-2">Special character</th>
+            <th className="pb-2 float-end">Remove item</th>
           </tr>
         </thead>
         <tbody>
@@ -86,7 +87,7 @@ export const Stats = observer(({ initialStats }: StatsProps) => {
                 <td className="py-2">{renderCheck(isLetter)}</td>
                 <td className="py-2">{renderCheck(isUpperCase)}</td>
                 <td className="py-2">{renderCheck(isSpecialChar)}</td>
-                <td className="py-2">
+                <td className="py-2 float-end">
                   <button
                     onClick={() => handleDelete(store, keyName)}
                     className="px-3 py-1 bg-cyan-700 text-white rounded hover:bg-cyan-800 transition"
