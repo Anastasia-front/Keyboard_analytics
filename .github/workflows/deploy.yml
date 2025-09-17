@@ -1,0 +1,64 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build-test-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout repo
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      # Setup Node.js + Yarn
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: 'yarn'
+
+      # Install dependencies (monorepo)
+      - name: Install Dependencies
+        run: yarn install --frozen-lockfile
+
+      # --- Backend (Nest + TypeORM + Railway) ---
+      - name: Build Backend
+        working-directory: apps/server
+        run: yarn build
+
+      - name: Run Backend Tests
+        working-directory: apps/server
+        run: yarn test --if-present
+
+      - name: Run DB Migrations
+        working-directory: apps/server
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: yarn typeorm migration:run -d dist/data-source.js
+
+      - name: Deploy Backend to Railway
+        working-directory: apps/server
+        run: |
+          yarn global add @railway/cli
+          railway login --token ${{ secrets.RAILWAY_TOKEN }}
+          railway up --service server --ci
+
+      # --- Frontend (React + Vercel) ---
+      - name: Build Frontend
+        working-directory: apps/client
+        run: yarn build
+
+      - name: Run Frontend Tests
+        working-directory: apps/client
+        run: yarn test --if-present
+
+      - name: Deploy Frontend to Vercel
+        working-directory: apps/client
+        run: |
+          yarn global add vercel
+          vercel pull --yes --token=${{ secrets.VERCEL_TOKEN }}
+          vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+          vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
