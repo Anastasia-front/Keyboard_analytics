@@ -290,7 +290,7 @@ It must create next structure of folder:
 
 ## Deployment
 ### Deploy database on Supabase
-- Go to Supabase -> Register/Login -> Create a project
+- Go to Supabase -> Register / Login -> Create a project
 - Get variables to connect backend : click on Connect button on header -> select connection method
 
 #### How to move DB from local Postgres to Supabase
@@ -322,7 +322,7 @@ pg_dump -U local_user -h localhost -p 5432 local_db_name | psql "postgresql://po
 ```
 
 ### Deploy backend on Railway
-- Go to Railway -> Register/Login -> Create a project (chose gitHub repo and set /apps/server as root folder)
+- Go to Railway -> Register / Login -> Create a project (chose gitHub repo and set /apps/server as root folder)
 - Add env variables : click on project in dashboard -> go to Variables tab (there are 8 default service variables) -> add variables (DB_HOST
 DB_PORT,
 DB_USER,
@@ -333,6 +333,6 @@ PORT)
 - Generate domain : click on project in dashboard -> go to Settings tab -> Networking section -> Generate domain (you get like name_of_project-environment.up.railway.app)
 
 ### Deploy frontend on Vercel
-- Go to Vercel -> Register/Login -> Create a project (chose gitHub repo and set /apps/client as root folder)
+- Go to Vercel -> Register / Login -> Create a project (chose gitHub repo and set /apps/client as root folder)
 - Add env variables : click on project in dashboard -> go to Settings tab -> Environment Variables side menu -> add variables (NEXT_PUBLIC_BACK_API_URL, NEXT_PUBLIC_WS_URL)
 - Get domain : go to Overview tab in dashboard -> copy Domain
