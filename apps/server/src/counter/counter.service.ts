@@ -18,8 +18,13 @@ export class CounterService {
     const counters = await this.counterRepo.find({ order: { count: 'DESC' } });
     return counters.map((c) => this.toDto(c));
   }
+  private normalizeKey(key: string): string {
+    return key === ' ' ? 'Space' : key;
+  }
 
   async getByKey(key: string): Promise<KeyStatsDto> {
+    key = this.normalizeKey(key); // normalize before DB query
+
     let counter = await this.counterRepo.findOne({ where: { key } });
     if (!counter) {
       counter = this.counterRepo.create({ key, count: 0 });
@@ -39,6 +44,8 @@ export class CounterService {
   }
 
   async increment(key: string): Promise<KeyStatsDto[]> {
+    key = this.normalizeKey(key); // normalize before DB query
+
     const counter = await this.counterRepo.findOne({ where: { key } });
     if (!counter) {
       const newCounter = this.counterRepo.create({ key, count: 1 });
@@ -52,6 +59,7 @@ export class CounterService {
   }
 
   async delete(key: string): Promise<void> {
+    key = this.normalizeKey(key); // normalize before DB delete
     await this.counterRepo.delete({ key });
   }
 
