@@ -22,7 +22,7 @@ export const Stats = observer(({ initialStats }: StatsProps) => {
   // Convert to plain JS
   const statsArray = toJS(store.stats).map((item) => ({
     ...item,
-    key: item.keyName === ' ' ? 'space' : item.keyName, // normalize space
+    key: item.keyName,
   }))
 
   return (
@@ -49,31 +49,54 @@ export const Stats = observer(({ initialStats }: StatsProps) => {
             <th className="pb-2">Key</th>
             <th className="pb-2">Presses</th>
             <th className="pb-2">Link</th>
+            <th className="pb-2">Number</th>
+            <th className="pb-2">Letter</th>
+            <th className="pb-2">CapsLock</th>
+            <th className="pb-2">Special character</th>
           </tr>
         </thead>
         <tbody>
-          {statsArray.map(({ keyName, count }) => (
-            <tr key={keyName} className="border-b-[0.1px] border-lightgray-100">
-              <td className="py-2">{keyName}</td>
-              <td className="py-2">{count}</td>
-              <td className="py-2">
-                <Link
-                  href={`/key/${encodeURIComponent(keyName)}`}
-                  className="text-cyan-600 hover:underline"
-                >
-                  {`/key/${keyName}`}
-                </Link>
-              </td>
-              <td className="py-2">
-                <button
-                  onClick={() => handleDelete(store, keyName)}
-                  className="px-3 py-1 bg-cyan-700 text-white rounded hover:bg-cyan-800 transition"
-                >
-                  Delete
-                </button>
-              </td>
-            </tr>
-          ))}
+          {statsArray.map(({ keyName, count }) => {
+            // Logic for boolean values
+            const isNumber = /^[0-9]$/.test(keyName) // single digit
+            const isLetter = /^[a-zA-Z]$/.test(keyName)
+            const isUpperCase = /^[A-Z]$/.test(keyName) // true if it's a single uppercase letter
+            const isSpecialChar =
+              /[^a-zA-Z0-9]/.test(keyName) || keyName === 'Space'
+
+            const renderCheck = (condition: boolean) =>
+              condition ? '✔️' : '✖️'
+
+            return (
+              <tr
+                key={keyName}
+                className="border-b-[0.1px] border-lightgray-100"
+              >
+                <td className="py-2">{keyName}</td>
+                <td className="py-2">{count}</td>
+                <td className="py-2">
+                  <Link
+                    href={`/key/${encodeURIComponent(keyName)}`}
+                    className="text-cyan-600 hover:underline"
+                  >
+                    {`/key/${keyName}`}
+                  </Link>
+                </td>
+                <td className="py-2">{renderCheck(isNumber)}</td>
+                <td className="py-2">{renderCheck(isLetter)}</td>
+                <td className="py-2">{renderCheck(isUpperCase)}</td>
+                <td className="py-2">{renderCheck(isSpecialChar)}</td>
+                <td className="py-2">
+                  <button
+                    onClick={() => handleDelete(store, keyName)}
+                    className="px-3 py-1 bg-cyan-700 text-white rounded hover:bg-cyan-800 transition"
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            )
+          })}
         </tbody>
       </table>
     </div>
