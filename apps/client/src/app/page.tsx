@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 import { toJS } from 'mobx'
 import { observer } from 'mobx-react-lite'
@@ -11,6 +11,7 @@ import { initializeStore } from '@/stores'
 
 const Page = observer(() => {
   const statsStore = initializeStore()
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     async function loadStats() {
@@ -19,12 +20,23 @@ const Page = observer(() => {
         statsStore.setStats(data)
       } catch (err) {
         console.error('Failed to fetch stats:', err)
+      } finally {
+        setLoading(false)
       }
     }
     loadStats()
   }, [statsStore])
 
   const statsArray = toJS(statsStore.stats)
+
+if (loading) {
+    return (
+      <div className="flex h-screen w-screen flex-col items-center justify-center">
+        <div className="h-12 w-12 animate-spin rounded-full border-4 border-blue-500 border-t-transparent"></div>
+        <p className="mt-4 text-lg text-gray-600">Loading stats, please wait…</p>
+      </div>
+    )
+  }
 
   return (
     <div>
