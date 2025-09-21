@@ -3,7 +3,22 @@
 This project is a real-time keyboard analytics tool built with **Next.js** (frontend) and **NestJS** (backend).  
 Users can see live statistics of key presses via WebSocket, with SEO-friendly server-rendered initial data.
 
----
+
+## Navigation
+- [Technologies](#🛠-technologies)
+- [Features](#✨-features)
+- [Optimization strategy](#📊-optimization-strategy)
+- [Additional features](#📄-additional-features)
+- [Getting started](#🚀-getting-started)
+- [Project structure](#📂-project-structure)
+- [Project setup](#⚙️-project-setup)
+  - [For client side](#for-client-side-of-the-project)
+  - [For server side](#for-server-side-of-the-project)
+- [GitHub Actions](#github-actions)
+- [Deployment](#deployment)
+  - [Deploy database on Supabase](#deploy-database-on-supabase)
+  - [Deploy backend on Railway](#deploy-backend-on-railway)
+  - [Deploy frontend on Vercel](#deploy-frontend-on-vercel)
 
 ## 🛠 Technologies
 
@@ -11,32 +26,68 @@ Users can see live statistics of key presses via WebSocket, with SEO-friendly se
 - [NestJS](https://nestjs.com/) + [TypeORM](https://typeorm.io/) + [PostgreSQL](https://www.postgresql.org/)
 - [Docker](https://docs.docker.com/) + [docker-compose](https://docs.docker.com/compose/)
 - [WebSocket API](https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API)
-- [GitHub Actions](#github-actions)
-- [Deployment](#deployment)
-  - [Deploy database on Supabase](#deploy-database-on-supabase)
-  - [Deploy backend on Railway](#deploy-backend-on-railway)
-  - [Deploy frontend on Vercel](#deploy-frontend-on-vercel)
+
+## ✨ Features
+
+- **Real-time keyboard analytics**  
+  The application listens to all key presses and streams them to the server over WebSocket. The statistics are updated live for all connected clients.
+
+- **Persistent data storage**  
+  All key press events are saved to a PostgreSQL database. The backend (NestJS + TypeORM) handles storing and broadcasting the aggregated stats.
+
+- **Optimized database interaction**  
+  Implemented efficient data handling to reduce load on the DB when keys are pressed frequently.
+
+- **Interactive visualization**  
+  The homepage shows a horizontal bar chart with the count of key presses for each key.  
+  Additionally, statistics are broken down by type of key:  
+  - **Number**  
+  - **Letter**  
+  - **CapsLock**  
+  - **Special characters**
+
+- **SEO-friendly statistics**  
+  Initial stats are pre-rendered on the server to make them visible for crawlers.
+
+- **Key detail pages**  
+  Each unique key has its own statically generated page (`/key/[id]`) showing:  
+  - The key name  
+  - Total presses  
+  - Navigation to keys with higher/lower press counts  
+  Pages are refreshed every 1 minute for up-to-date info.
+
+- **MobX state management with loading state**  
+  While the store is being initialized, a loader is displayed, ensuring a smooth user experience.
+
+- **Data cleanup**  
+  Added functionality to **delete a key** from the database when needed.
+
+
+
+### 📊 Optimization strategy
 ---
 
-## 📂 Project structure
 
-```bash
-/apps
-  /client  (Next.js)
-  /server  (NestJS)
-.eslintrc
-.gitignore
-.prettierignore
-docker-compose.yml
-eslint.config.mjs
-package.json
-prettier.config.js
-README.md
-```
+To prevent database overload under heavy key press frequency:
 
+- Store key press counts in memory.
+
+- Batch write updates to DB every X seconds (configurable).
+
+- Use transactions to minimize write operations.
+
+
+### 📄 Additional features
 ---
 
-## 🚀 Getting Started
+- Static pages per key with ISR (Incremental Static Regeneration), updating every minute.
+
+- SEO-friendly initial render for main statistics page.
+
+- Navigation between keys based on press count.
+
+
+## 🚀 Getting started
 
 ### 1. Install dependencies
 
@@ -106,31 +157,31 @@ cd apps/client
 yarn run dev
 ```
 
----
 
-### 📊 Optimization strategy
+## 📂 Project structure
 
-To prevent database overload under heavy key press frequency:
-
-- Store key press counts in memory.
-
-- Batch write updates to DB every X seconds (configurable).
-
-- Use transactions to minimize write operations.
-
----
-
-### 📄 Additional features
-
-- Static pages per key with ISR (Incremental Static Regeneration), updating every minute.
-
-- SEO-friendly initial render for main statistics page.
-
-- Navigation between keys based on press count.
+```bash
+/apps
+  /client  (Next.js)
+  /server  (NestJS)
+.eslintrc
+.gitignore
+.prettierignore
+docker-compose.yml
+eslint.config.mjs
+package.json
+prettier.config.js
+README.md
+```
 
 ## ⚙️ Project setup
+---
 
-### For client side of project use command inside <u>apps/</u> directory to initialize it:
+### For client side of the project 
+---
+
+
+**Use command inside <u>apps/</u> directory to initialize it:**
 
 1. Create a Next.js + TypeScript project
 
@@ -145,6 +196,8 @@ This creates a Next.js app with TypeScript support out of the box.
 Project needs mobx for state management and mobx-react-lite for React bindings.
 
 ```bash
+npm install mobx mobx-react-lite recharts
+#or
 yarn add mobx mobx-react-lite recharts
 ```
 
@@ -204,18 +257,28 @@ NEXT_PUBLIC_WS_URL
       /[keyName].tsx
 ```
 
-### For server side of project use command inside <u>apps/</u> directory to initialize it (with yarn):
+### For server side of the project 
+---
+
+
+**Use command inside <u>apps/</u> directory to initialize it:**
 
 1. Create NestJS project
 
 ```bash
+npm install -g @nestjs/cli
+#or
 yarn global add @nestjs/cli
+
 nest new server
 ```
 
 2. Install PostgreSQL & TypeORM dependencies
 
 ```bash
+npm install @nestjs/typeorm typeorm pg
+npm install @nestjs/config
+#or
 yarn add @nestjs/typeorm typeorm pg
 yarn add @nestjs/config
 ```
@@ -223,6 +286,9 @@ yarn add @nestjs/config
 3. Add dependencies for WebSocket (NestJS does not ship @nestjs/websockets or socket.io by default)
 
 ```bash
+npm install @nestjs/websockets @nestjs/platform-socket.io socket.io
+npm install -D @types/socket.io
+#or
 yarn add @nestjs/websockets @nestjs/platform-socket.io socket.io
 yarn add -D @types/socket.io
 ```
@@ -244,7 +310,7 @@ Your tsconfig.json should automatically pick up the types. If not, add line belo
 
 ```bash
 # PostgreSQL connection settings
-DB_HOST=
+DB_HOST
 DB_PORT
 DB_USER
 DB_PASS
@@ -289,7 +355,11 @@ It must create next structure of folder:
 
 
 ## Deployment
+---
+
 ### Deploy database on Supabase
+---
+
 - Go to Supabase -> Register / Login -> Create a project
 - Get variables to connect backend : click on Connect button on header -> select connection method
 
@@ -322,6 +392,8 @@ pg_dump -U local_user -h localhost -p 5432 local_db_name | psql "postgresql://po
 ```
 
 ### Deploy backend on Railway
+---
+
 - Go to Railway -> Register / Login -> Create a project (chose gitHub repo and set /apps/server as root folder)
 - Add env variables : click on project in dashboard -> go to Variables tab (there are 8 default service variables) -> add variables (DB_HOST
 DB_PORT,
@@ -333,6 +405,8 @@ PORT)
 - Generate domain : click on project in dashboard -> go to Settings tab -> Networking section -> Generate domain (you get like name_of_project-environment.up.railway.app)
 
 ### Deploy frontend on Vercel
+---
+
 - Go to Vercel -> Register / Login -> Create a project (chose gitHub repo and set /apps/client as root folder)
 - Add env variables : click on project in dashboard -> go to Settings tab -> Environment Variables side menu -> add variables (NEXT_PUBLIC_BACK_API_URL, NEXT_PUBLIC_WS_URL)
 - Get domain : go to Overview tab in dashboard -> copy Domain
