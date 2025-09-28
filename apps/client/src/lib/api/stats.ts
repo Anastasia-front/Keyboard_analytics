@@ -8,7 +8,7 @@ export const fetchStats = async () => {
 
 export const fetchKey = async (key: string) => {
   const res = await fetch(`${API_URL}/counter/${key}`, {
-    next: { revalidate: 60 }, // ISR every 60 seconds
+    next: { revalidate: 30 }, // ISR(Incremental Static Regeneration) every 30 seconds
   })
   if (!res.ok) throw new Error(`Failed to fetch stats: ${res.status}`)
   return res.json()
