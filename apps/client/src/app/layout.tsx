@@ -32,6 +32,7 @@ export default function RootLayout({
           href="/"
           className="text-white
                     text-3xl
+                    text-center
                     font-extrabold
                     uppercase
                     tracking-wide
