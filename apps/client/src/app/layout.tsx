@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Karla, Outfit } from 'next/font/google'
-import Link from 'next/link'
+
+import { AppHeader } from '@/components/AppHeader'
 
 import './globals.css'
 
@@ -28,32 +29,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${karla.variable} ${outfit.variable} antialiased`}>
-        <Link
-          href="/"
-          className="text-white
-                    text-3xl
-                    text-center
-                    font-extrabold
-                    uppercase
-                    tracking-wide
-                    px-6 py-3
-                    shadow-md
-                    bg-gradient-to-r from-cyan-700 to-blue-800
-                    hover:shadow-lg
-                    hover:scale-105
-                    transition
-                    duration-300
-                    ease-in-out
-                    font-sans 
-                    flex 
-                    justify-center 
-                    pt-7 
-                    mb-[-50px]
-    "
-        >
-          Keyboard analytics
-        </Link>
-        {children}
+        <AppHeader />
+        <main className="flex-1">{children}</main>
       </body>
     </html>
   )
