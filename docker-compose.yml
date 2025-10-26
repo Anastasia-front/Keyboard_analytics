@@ -1,10 +1,7 @@
-version: "3.8"
-
 services:
-  postgres:
+  db:
     image: postgres:15
-    restart: always
-    container_name: prog-genius-postgres
+    container_name: keyboard-db
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -13,6 +10,36 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+
+  server:
+    build:
+      context: ./apps/server
+    container_name: keyboard-server
+    env_file:
+      - ./apps/server/.env
+    ports:
+      - "4000:4000"
+    depends_on:
+      - db
+    command: yarn start:dev
+    volumes:
+      - ./apps/server:/usr/src/app
+      - /usr/src/app/node_modules
+
+  client:
+    build:
+      context: ./apps/client
+    container_name: keyboard-client
+    env_file:
+      - ./apps/client/.env
+    ports:
+      - "3000:3000"
+    depends_on:
+      - server
+    command: npx next dev -H 0.0.0.0
+    volumes:
+      - ./apps/client:/usr/src/app
+      # - /usr/src/app/node_modules
 
 volumes:
   pgdata:

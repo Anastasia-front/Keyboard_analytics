@@ -19,6 +19,16 @@ Users can see live statistics of key presses via WebSocket, with SEO-friendly se
   - [Deploy database on Supabase](#deploy-database-on-supabase)
   - [Deploy backend on Railway](#deploy-backend-on-railway)
   - [Deploy frontend on Vercel](#deploy-frontend-on-vercel)
+- [OAuth authentication](#oauth-authentication)
+  - [Add env variables in /apps/server/.env](#add-env-variables-in-appsserverenv)
+    - [JWT / Cookies](#🔐-JWT/cookies)
+    - [Google OAuth](#🌐-google-oauth)
+    - [GitHub OAuth](#🐙-github-oauth)
+    - [LinkedIn OAuth](#💼-linkedin-oauth)
+  - [Install necessary dependencies](#install-necessary-dependencies-in-root-folder)
+
+
+
 
 ## 🛠 Technologies
 
@@ -98,11 +108,7 @@ npm install
 yarn install
 ```
 
-### 2. Run PostgreSQL via Docker
-
-- docker-compose up -d
-
-### 3. Environment variables
+### 2. Environment variables
 
 Create in
 
@@ -143,20 +149,128 @@ NEXT_PUBLIC_BACK_API_URL=http://localhost:4000
 NEXT_PUBLIC_WS_URL=ws://localhost:4000
 ```
 
-### 4. Run Backend
+### 3. Run Backend
 
 ```bash
 cd apps/server
 yarn run start:dev
 ```
 
-### 5. Run Frontend
+### 4. Run Frontend
 
 ```bash
 cd apps/client
 yarn run dev
 ```
 
+### 5. Run Database
+#### 🐳 Locally in Docker
+
+1. Prerequisites
+
+Make sure you have installed:
+
+```bash
+docker --version
+docker compose version
+```
+
+If not, install Docker Desktop (it includes Docker Compose).
+
+If docker-compose.yml doesn’t exist at the root yet, you can create one (example below).
+
+```bash
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:15
+    restart: always
+    container_name: prog-genius-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: mydb
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
+  ```
+Now you need to launch Docker Desktop and run container by command:
+```bash
+docker compose up -d
+```
+
+#### 🔄 Connect to Supabase instead of local DB
+
+If you want to use Supabase instead of Docker PostgreSQL:
+
+- Stop the local DB container:
+```bash
+docker compose stop db
+```
+
+- Update your backend .env (/apps/server/.env) like this:
+```bash
+DB_HOST=aws-1-eu-west-3.pooler.supabase.com
+DB_PORT=6543
+DB_USER=postgres.qedgqkfndvoswgmxnmqa
+DB_PASS=your_supabase_password
+DB_NAME=postgres
+```
+
+- Restart only backend & frontend
+
+
+Everything else (Supabase URL + anon key) stays in /apps/client/.env.
+
+### 6. Launch all containers (optional, instead of steps 3-5)
+
+Current version of the project include docker-compose.yml for this configuration.
+
+Run from the root folder:
+
+```bash
+docker compose up --build
+#after
+docker compose up -d
+```
+
+Then visit:
+
+- Frontend → http://localhost:3000
+- Backend → http://localhost:4000
+- PostgreSQL → exposed on port 5432 (you can connect via TablePlus / pgAdmin)
+
+#### 🧩 Useful commands
+
+| Action | Command |
+|--------|----------|
+| Start containers | `docker compose up -d` |
+| Stop containers | `docker compose down` |
+| View logs | `docker compose logs -f` |
+| Rebuild after code changes | `docker compose up --build` |
+| Enter backend shell | `docker exec -it keyboard-server sh` |
+| Enter DB shell | `docker exec -it keyboard-db psql -U postgres -d mydb` |
+
+#### 🌍 Host visibility
+
+If you want to access your backend from your host (not just inside Docker), you already expose ports:
+
+- 4000 → backend
+- 3000 → frontend
+
+So your local browser can reach both directly via localhost.
+
+If another device on your network should access it, use your host machine IP, e.g.:
+
+```bash
+NEXT_PUBLIC_BACK_API_URL=http://192.168.0.10:4000
+NEXT_PUBLIC_WS_URL=ws://192.168.0.10:4000
+```
 
 ## 📂 Project structure
 
@@ -257,6 +371,14 @@ NEXT_PUBLIC_WS_URL
       /[keyName].tsx
 ```
 
+9. Create Dockerfile
+
+For production later, use:
+```bash
+RUN yarn build
+CMD ["yarn", "start"]
+```
+
 ### For server side of the project 
 ---
 
@@ -347,6 +469,11 @@ It must create next structure of folder:
   /app.module.ts
 ```
 
+6. Create Dockerfile
+
+* If you later want to build a production image, change CMD to
+CMD ["yarn", "start:prod"] and build with the compiled /dist folder.
+
 ## GitHub Actions
    - Run tests, lint, build
    - Deploy backend to Railway
@@ -391,10 +518,10 @@ it could be done by one complete command like:
 pg_dump -U local_user -h localhost -p 5432 local_db_name | psql "postgresql://postgres.qedgqkfndvoswgmxnmqa:[PASSWORD]@aws-1-eu-west-3.pooler.supabase.com:6543/postgres"
 ```
 
-### Deploy backend on Railway
+### Deploy backend on Railway / Render
 ---
 
-- Go to Railway -> Register / Login -> Create a project (chose gitHub repo and set /apps/server as root folder)
+- Go to Railway / Render -> Register / Login -> Create a project (chose gitHub repo and set /apps/server as root folder)
 - Add env variables : click on project in dashboard -> go to Variables tab (there are 8 default service variables) -> add variables (DB_HOST
 DB_PORT,
 DB_USER,
@@ -402,7 +529,10 @@ DB_PASS,
 DB_NAME,
 FRONT_BASE_URL,
 PORT)
-- Generate domain : click on project in dashboard -> go to Settings tab -> Networking section -> Generate domain (you get like name_of_project-environment.up.railway.app)
+- For Railway: 
+  - Generate domain : click on project in dashboard -> go to Settings tab -> Networking section -> Generate domain (you get like name_of_project-environment.up.railway.app)
+- For Render: 
+  - Copy domain : click on project in dashboard -> at the top of project info copy autogenerated domain name (you get like name_of_project.onrender.com)
 
 ### Deploy frontend on Vercel
 ---
@@ -410,3 +540,110 @@ PORT)
 - Go to Vercel -> Register / Login -> Create a project (chose gitHub repo and set /apps/client as root folder)
 - Add env variables : click on project in dashboard -> go to Settings tab -> Environment Variables side menu -> add variables (NEXT_PUBLIC_BACK_API_URL, NEXT_PUBLIC_WS_URL)
 - Get domain : go to Overview tab in dashboard -> copy Domain
+
+
+## OAuth authentication
+---
+
+### **Add env variables** in /apps/server/.env
+
+```bash
+# JWT & Cookies
+JWT_SECRET=super-secret-change-me
+JWT_EXPIRES=7d
+COOKIE_NAME=pg_auth
+COOKIE_SECURE= #true in production (only send over HTTPS) | false in local dev (so it works on http://localhost)
+
+# Google OAuth
+GOOGLE_CLIENT_ID=xxxxxxxx.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=xxxxxxxx
+
+# GitHub OAuth
+GITHUB_CLIENT_ID=xxxxxxxx
+GITHUB_CLIENT_SECRET=xxxxxxxx
+
+# LinkedIn OAuth
+LINKEDIN_CLIENT_ID=xxxxxxxx
+LINKEDIN_CLIENT_SECRET=xxxxxxxx
+```
+
+#### 🔐 JWT / Cookies
+---
+These are for your **NestJS auth server** only:
+
+- **`JWT_SECRET`** → make up a strong random string (e.g. from [1password generator](https://1password.com/password-generator/), `openssl rand -hex 32`, etc.).  
+
+  Example:  
+```bash
+  JWT_SECRET=2fd44a2a8aa3d939f5ce3f6f0f40b07c
+```
+- **`JWT_EXPIRES`** → how long the token should live (any jsonwebtoken format, e.g. 7d, 1h, 30m).
+
+- **`COOKIE_NAME`** → arbitrary name for the cookie you’ll store the JWT in.
+
+Example:
+
+```bash
+COOKIE_NAME=pg_auth
+```
+- **`COOKIE_SECURE`** →
+
+- `true` in production (only send over HTTPS)
+- `false` in local dev (so it works on http://localhost:3000)
+
+#### 🌐 Google OAuth
+---
+
+1. Go to [Google Cloud Console](https://console.cloud.google.com/).
+2. Create a **new project** (or reuse one).
+3. Enable **Google+ API / Google Identity Services**.
+4. Go to **APIs & Services > Credentials → Create OAuth 2.0 Client ID**.
+    - Application type = **Web application**
+    - Add **Authorized redirect URI**:
+
+```bash
+http://localhost:3001/auth/google/callback
+
+* (replace 3001 with your NestJS backend port)
+```
+
+Copy values into your .env:
+```bash
+GOOGLE_CLIENT_ID=xxxxxxxx.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=xxxxxxxx
+```
+#### 🐙 GitHub OAuth
+---
+
+1. Go to [GitHub Developer Settings](https://github.com/settings/developers).
+2. Click **New OAuth App**.
+    - Homepage URL = `http://localhost:3000` (Next.js client)
+    - Authorization callback URL = `http://localhost:3001/auth/github/callback`
+
+3. Register, then copy values into .env:
+```bash
+GITHUB_CLIENT_ID=xxxxxxxx
+GITHUB_CLIENT_SECRET=xxxxxxxx
+```
+
+#### 💼 LinkedIn OAuth
+---
+
+1. Go to [LinkedIn Developers](https://developer.linkedin.com/).
+2. Create an **App**.
+3. In the App, go to **Auth tab**.
+    - Add redirect URL:
+```bash
+http://localhost:3001/auth/linkedin/callback
+```
+4. Copy values into .env:
+```bash
+LINKEDIN_CLIENT_ID=xxxxxxxx
+LINKEDIN_CLIENT_SECRET=xxxxxxxx
+```
+
+### **Install necessary dependencies** (in root folder)
+```bash
+yarn workspace server add @nestjs/passport passport @nestjs/jwt passport-jwt
+yarn workspace server add passport-google-oauth20 passport-github2 passport-linkedin-oauth2
+```
