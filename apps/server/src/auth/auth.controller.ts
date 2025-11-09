@@ -9,6 +9,7 @@ import {
   GoogleAuthGuard,
   LinkedinAuthGuard,
 } from './guards/provider.guard';
+import { GoogleUser } from './strategies/google.strategy';
 
 @Controller('auth')
 export class AuthController {
@@ -19,20 +20,27 @@ export class AuthController {
 
   private setAuthCookie(res: Response, token: string) {
     const cookieName = this.config.get<string>('COOKIE_NAME') || 'pg_auth';
-    const secure = this.config.get<string>('COOKIE_SECURE') === 'true';
+    const cookieSecure = this.config.get<boolean>('COOKIE_SECURE') || false;
+    const isProd = this.config.get<string>('ENV_TYPE') === 'production';
+
     res.cookie(cookieName, token, {
       httpOnly: true,
-      secure,
-      sameSite: 'lax',
-      maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+      secure: cookieSecure, // only true in prod
+      sameSite: isProd ? 'none' : 'lax',
+      maxAge: 1000 * 60 * 60 * 24 * 7,
       path: '/',
     });
   }
 
-  private redirectApp(res: Response, success: boolean) {
+  private redirectApp(res: Response, success: boolean, token?: string) {
     const appUrl =
-      this.config.get<string>('APP_URL') ?? 'http://localhost:3000';
-    res.redirect(`${appUrl}/auth/${success ? 'success' : 'error'}`);
+      this.config.get<string>('FRONT_BASE_URL') ?? 'http://localhost:3000';
+
+    const redirectUrl = success
+      ? `${appUrl}/auth/success${token ? `?token=${token}` : ''}`
+      : `${appUrl}/auth/error`;
+
+    res.redirect(redirectUrl);
   }
 
   private async handleOAuthCallback(
@@ -45,7 +53,8 @@ export class AuthController {
       const jwt = this.auth.signUserJwt(u.id);
       this.setAuthCookie(res, jwt);
       this.redirectApp(res, true);
-    } catch {
+    } catch (err) {
+      console.error('OAuth callback error:', err);
       this.redirectApp(res, false);
     }
   }
@@ -55,13 +64,32 @@ export class AuthController {
   @UseGuards(GoogleAuthGuard)
   googleAuth() {}
 
+  // @Get('google/callback')
+  // @UseGuards(GoogleAuthGuard)
+  // async googleCallback(@Req() req: Request, @Res() res: Response) {
+  //   const user: OAuthUser = req.user as OAuthUser;
+  //   await this.handleOAuthCallback('google', user, res);
+  // }
   @Get('google/callback')
   @UseGuards(GoogleAuthGuard)
   async googleCallback(@Req() req: Request, @Res() res: Response) {
-    const user: OAuthUser = req.user as OAuthUser;
-    await this.handleOAuthCallback('google', user, res);
+    try {
+      console.log('✅ Google callback triggered');
+      console.log('User from Google:', req.user);
+      const user = req.user as GoogleUser; // Typed as GoogleUser
+      console.log('✅ Google callback triggered:', user);
+      await this.handleOAuthCallback(
+        'google',
+        user as unknown as OAuthUser,
+        res,
+      );
+    } catch (err) {
+      console.error('❌ Error during Google callback:', err);
+      res
+        .status(500)
+        .json({ message: 'Google auth callback failed', error: err.message });
+    }
   }
-
   // ---------- GitHub ----------
   @Get('github')
   @UseGuards(GithubAuthGuard)

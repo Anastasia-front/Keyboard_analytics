@@ -27,7 +27,7 @@ export class LinkedinAuthStrategy extends PassportStrategy(
       clientID: config.get<string>('LINKEDIN_CLIENT_ID') || 'clientID',
       clientSecret:
         config.get<string>('LINKEDIN_CLIENT_SECRET') || 'clientSecret',
-      callbackURL: `${config.get<string>('API_URL')}/auth/linkedin/callback`,
+      callbackURL: `${config.get<string>('FRONT_BASE_URL')}/auth/linkedin/callback`,
       scope: ['r_emailaddress', 'r_liteprofile'],
       state: false, // 👈 disables session-based state handling
     });

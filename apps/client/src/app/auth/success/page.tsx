@@ -1,21 +1,40 @@
-'use client'
+'use client';
 
-import { useEffect } from 'react'
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
-import { useRouter } from 'next/navigation'
-
-import { authStore } from '@/stores'
-
-const AuthSuccess = () => {
-  const router = useRouter()
+export default function AuthSuccess() {
+  const router = useRouter();
 
   useEffect(() => {
-    authStore.loadMe().then(() => {
-      router.replace('/')
-    })
-  }, [router])
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('token');
 
-  return <p className="p-8">Signing you in…</p>
+    if (token) {
+      // Save JWT for later API calls (optional if using cookies)
+      localStorage.setItem('jwt', token);
+    }
+
+    // Redirect to homepage after short delay
+    const timeout = setTimeout(() => {
+      router.push('/');
+    }, 1000);
+
+    return () => clearTimeout(timeout);
+  }, [router]);
+
+  return (
+    <div
+      style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+        flexDirection: 'column',
+      }}
+    >
+      <h2>✅ Logged in successfully!</h2>
+      <p>Redirecting to home...</p>
+    </div>
+  );
 }
-
-export default AuthSuccess

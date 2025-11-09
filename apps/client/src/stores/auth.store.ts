@@ -30,6 +30,7 @@ class AuthStore {
         runInAction(() => (this.me = data))
       } else {
         runInAction(() => (this.me = null))
+        throw new Error('Unauthorized');
       }
     } finally {
       runInAction(() => (this.loading = false))

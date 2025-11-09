@@ -120,8 +120,31 @@ export const Stats = observer(({ initialStats }: StatsProps) => {
 
       {/* Overlay Login Button when not logged in */}
       {!isLoggedIn && (
-        <div className="fixed inset-0 flex items-center justify-center bg-white/20 backdrop-blur-xs">
-          <Link
+        <div className="fixed inset-0 flex items-center justify-center">
+          {/* content card */}
+          <div className="backdrop-blur-xl bg-white/40 p-10 rounded-3xl shadow-lg max-w-md flex flex-col items-center justify-center">
+            <h1 className="text-3xl font-semibold text-gray-800 mb-4 uppercase">
+              Welcome back 👋🏼
+            </h1>
+            <p className="text-gray-800 mb-8">
+              Please log in to access your personalized key stats
+            </p>
+            <Link
+              href="/login"
+              className="px-8 py-3 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-400 text-white font-medium shadow-md hover:shadow-lg transition-transform duration-300 ease-in-out hover:scale-105 active:scale-95"
+            >
+              Go to Login
+            </Link>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+})
+
+{
+  /* <div className="fixed inset-0 flex items-center justify-center bg-white/20 backdrop-blur-xs">
+        <Link
             href="/login"
             className="px-6
             py-2
@@ -140,7 +163,5 @@ export const Stats = observer(({ initialStats }: StatsProps) => {
             Sign in
           </Link>
         </div>
-      )}
-    </div>
-  )
-})
+      ) */
+}
