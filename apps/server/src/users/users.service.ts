@@ -73,4 +73,26 @@ export class UsersService {
 
     return this.repo.save(user);
   }
+
+  // --------------------- New method for email/password registration ---------------------
+  async create(input: {
+    email: string;
+    password: string;
+    firstName?: string | null;
+    lastName?: string | null;
+  }): Promise<User> {
+    // Check if email is already taken
+    const existing = await this.findByEmail(input.email);
+    if (existing) throw new Error('Email already in use');
+
+    // Create a new user entity
+    const user = this.repo.create({
+      email: input.email,
+      password: input.password, // already hashed before calling this
+      firstName: input.firstName ?? null,
+      lastName: input.lastName ?? null,
+    });
+
+    return this.repo.save(user);
+  }
 }
